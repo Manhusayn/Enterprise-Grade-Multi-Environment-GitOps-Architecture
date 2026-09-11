@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: gitops-demo
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - environment: dev
+            path: gitops/environments/dev
+          - environment: stage
+            path: gitops/environments/stage
+          - environment: prod
+            path: gitops/environments/prod
+  template:
+    metadata:
+      name: 'gitops-demo-{{environment}}'
+      labels:
+        environment: '{{environment}}'
+    spec:
+      project: enterprise-gitops
+      source:
+        repoURL: https://github.com/REPLACE_ME/enterprise-multi-environment-gitops.git
+        targetRevision: main
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{environment}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

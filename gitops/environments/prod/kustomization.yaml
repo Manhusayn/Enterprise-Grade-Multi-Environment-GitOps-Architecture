@@ -1,0 +1,45 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: prod
+
+resources:
+  - ../../base
+  - network-policy.yaml
+  - pdb.yaml
+namePrefix: prod-
+
+commonLabels:
+  environment: prod
+
+patches:
+  - target:
+      kind: Namespace
+      name: gitops-demo
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: prod
+  - target:
+      kind: Deployment
+      name: gitops-demo
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: 500m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 256Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: prod
+  - target:
+      kind: Service
+      name: gitops-demo
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: prod-gitops-demo

@@ -1,0 +1,10 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gitops-demo-default-deny-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gitops-demo
+  policyTypes:
+    - Ingress
